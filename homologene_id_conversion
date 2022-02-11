@@ -1,0 +1,34 @@
+###########################
+#installation of homologene is required
+#install.packages('homologene') or 
+#devtools::install_github('oganm/homologene')
+
+#load homologene
+library(homologene)
+
+#convert mouse gene ids to human gene ids
+#genes is a vector of gene symbols or NCBI ids
+#db	Homologene database to use
+
+
+#mouse to human (mth)
+mth <- mouse2human(genes=genes, db = homologeneData2)
+mth
+
+#how many genes were mapped to human gene symbols uniquely?
+length(unique(mth[["humanGene"]]))
+
+#how many genes were lost during the id conversion? 
+length(unique(genes)) - length(unique(mth[["mouseGene"]]))
+
+#which genes were lost?
+setdiff(unique(genes), unique(mth[["mouseGene"]]))
+
+#Which genes have more than one mapping
+mth[duplicated(mth[["humanGene"]]),] 
+
+#see multiple ids for these genes
+duplicates <- mth[duplicated(mth[["humanGene"]]),][["humanGene"]]
+df <- mth[which(mth [["humanGene"]] %in% duplicates),]
+df[order(df[,"humanGene"]),]
+###########################
