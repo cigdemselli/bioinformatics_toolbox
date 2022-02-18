@@ -2,7 +2,6 @@
 #installation of biomaRt is required
 #install.packages('biomaRt') 
 
-
 ##load biomaRt
 library(biomaRt)
 
@@ -16,7 +15,6 @@ listDatasets(mart = ensembl)
 species <- useEnsembl(biomart="ensembl", dataset="hsapiens_gene_ensembl")
 listAttributes(species)
 listFilters(species)
-
 
 ###########################
 #function
