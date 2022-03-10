@@ -1,0 +1,30 @@
+#Aim is to list and read all files in a directory and then merge all. 
+# An example scenary is when we need to merge separate files for samples from a sequencing expriment under the same matrix.
+# For example find and merge all separate .FPKM files in the same matrix file
+
+#STEPS
+#1) Specify working directory (wd) and find files
+wd <- "type working directory here"
+list_all <- list.files(wd)
+
+#2) Grep files you are after (here I am after FPKM files)
+file_names <- list_all[grep(".FPKM.xls", list_all)]
+
+#3) Read files. FPKM files may contain more coloumn then we need. I am extracting two columns ("gene_id" and "FPKM")] here. 
+list_of_allfiles <- lapply(file_names, function(x) {
+  expr_matrix <- as.matrix(read.table(paste0(wd, x), header = TRUE))[, c("gene_id", "FPKM")]
+  expr_matrix
+})
+
+#4) Merge files and tidy up
+merged <- Reduce(function (x, y) merge(x, y, by="gene_id", all.x=TRUE), list_of_allfiles)
+
+#Check dimentions
+dim(merged)
+
+#Rename rows and get rid of of gene_id column
+rownames(merged) <-  merged$gene_id
+merged$gene_id <- NULL
+
+#Rename colnames (here I substract first 5 characters of file names as the rest is not useful (*.gene.FPKM.xls) 
+colnames(mrg) <- paste0(substr(file_names, 1, 5), "_FPKM")
