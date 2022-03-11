@@ -1,0 +1,110 @@
+###########################
+#The hpa_plot function given below plots levels of a gene in normal and cancer tissue based on Human Protein Atlas (HPA) database. 
+
+###########################
+#installation of required packages
+
+install.packages('hpar')
+install.packages('ggplot2')
+install.packages("ggthemes")
+install.packages("cowplot")
+
+###########################
+#arguments 
+#The programme takes 3 arguments gene, normal, cancer. 
+#gene gene id such as "ENSG00000091831"
+#normal normal tissue name such as "breast
+#cancer cancer tissue name such as "breast cancer"
+
+#to see list of normal tissue names available in HPA database
+data("hpaNormalTissue")
+data("hpaCancer")
+sort(unique(hpaCancer[["Cancer"]]))
+sort(unique(hpaNormalTissue[["Tissue"]]))
+
+
+###########################
+#example usage in R 
+
+#ESR1 (ER) gene
+hpa_plot(gene = "ENSG00000091831", normal = "breast", cancer = "breast cancer")
+
+#MKI67 (Ki67 proliferation marker)
+hpa_plot(gene = "ENSG00000148773", normal = "breast", cancer = "breast cancer")
+hpa_plot(gene = "ENSG00000148773", normal = "pancreas", cancer = "pancreatic cancer")
+
+
+###########################
+#function
+
+library(hpar)
+library(ggplot2)
+library(ggthemes)
+library(cowplot)
+
+
+hpa_plot <- function(gene = "ENSG00000091831",
+                     normal = "breast",
+                     cancer = "breast cancer"){
+  
+  dt_normal <- getHpa(gene, hpadata = "hpaNormalTissue")
+  dt_cancer <- getHpa(gene, hpadata = "hpaCancer")
+  
+  normal_sub <- dt_normal[dt_normal["Tissue"] == normal,]
+  cancer_sub <- dt_cancer[dt_cancer["Cancer"] == cancer,] 
+  
+  
+  plot_normal <- data.frame(normal_sub)
+  plot_normal[["tissue_celltype"]] <- paste0(paste0(paste(plot_normal[["Tissue"]],
+                                                      "("), plot_normal[["Cell.type"]]), ")")
+  
+  p_normal <- ggplot(plot_normal, aes(x=tissue_celltype, y="", fill=Level)) +
+      geom_tile(colour="white") +
+      coord_flip() +
+      theme_few() +
+      scale_fill_manual(values=c("Not detected"= "#636363",
+                                 "High" = "#993404",
+                                 "Medium" = "#fe9929",
+                                 "Low" = "#ffffd4")) +
+      ggtitle(paste0(gene, "\n",normal)) +  
+      theme(legend.position = "right",
+            legend.title = element_blank(),
+            title =element_text(size=12),
+            axis.text.y = element_text(size=14, vjust=0.3, hjust=0.95), 
+            axis.text.x = element_blank(),
+            axis.ticks.x = element_blank(),
+            axis.title.x = element_blank(),
+            axis.title.y = element_blank())
+  
+  
+  wnt <- c("High", "Medium", "Low", "Not.detected")
+  plot_cancer <- data.frame(t(cancer_sub[,wnt]))
+  names(plot_cancer) <- NULL
+  plot_cancer[["Level"]] <- rownames(plot_cancer)
+  names(plot_cancer) <- c(gene, "Level")
+  plot_cancer[[gene]] <- as.numeric(plot_cancer[[gene]])
+  
+  p_cancer <- ggplot(plot_cancer, aes(x = Level,
+                                      y = .data[[gene]],
+                                      fill = Level)) +
+      geom_col(colour="white") +
+      theme_few()+
+      scale_fill_manual(values=c("Not.detected"= "#636363",
+                                 "High" = "#993404",
+                                 "Medium" = "#fe9929",
+                                 "Low" = "#ffffd4")) +
+      ggtitle(paste0(gene, "\n", cancer)) +  
+      theme(legend.position = "right",
+            legend.title = element_blank(),
+            title =element_text(size=12),
+            axis.text.y = element_text(size=14, vjust=0.3, hjust=0.95), 
+            axis.text.x = element_text(angle=90, size=14, vjust=0.20, hjust=0.95),
+            axis.title.x = element_blank()) +
+      ylab("number of samples")
+  
+  plot_grid(p_normal, p_cancer,
+            ncol=2, nrow=1,
+            align="h", rel_widths = c(1,1))
+}
+
+###########################
