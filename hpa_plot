@@ -16,7 +16,7 @@ install.packages("cowplot")
 #normal normal tissue name such as "breast
 #cancer cancer tissue name such as "breast cancer"
 
-#to see list of normal tissue names available in HPA database
+#to see list of normal and cancer tissue names available in HPA database
 data("hpaNormalTissue")
 data("hpaCancer")
 sort(unique(hpaCancer[["Cancer"]]))
