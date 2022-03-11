@@ -1,1 +1,55 @@
+###########################
+#installation of biomaRt is required
+#install.packages('biomaRt') 
 
+##load biomaRt
+library(biomaRt)
+
+#to see the list of datasets 
+#such as mmusculus_gene_ensembl; hsapiens_gene_ensembl
+ensembl <- useEnsembl(biomart = "ensembl")
+listDatasets(mart = ensembl)
+
+#to see the list of attributes and filters per species
+#such as  entrezgene_id illumina_humanht_12_v3  hgnc_symbol mgi_symbol
+species <- useEnsembl(biomart="ensembl", dataset="hsapiens_gene_ensembl")
+listAttributes(species)
+listFilters(species)
+
+###########################
+#function
+
+#id_list: a vector of ids we want to convert
+#filt: the features we feed in such as "entrezgene_id
+#attr: the features we are after such as "hgnc_symbol"
+#dataset: the name of species such as "hsapiens_gene_ensembl"
+
+id_convert <- function(dataset, filt, attr, id_list){
+  
+  #conversion table
+  Mart <- useMart(biomart="ensembl", dataset=dataset)
+  
+  conv_tb <- getBM(attributes = c(filt, attr),
+          filters = filt,
+          values = id_list,
+          mart = Mart)
+  
+  #return the table
+  return(conv_tb)
+}
+
+###########################
+#example use of the function
+id_list <-  c("4288", "2064", "2099")
+
+id_convert(dataset = "hsapiens_gene_ensembl",
+           filt = "entrezgene_id",
+           attr = "hgnc_symbol",
+           id_list = id_list) 
+
+#   entrezgene_id hgnc_symbol
+# 1          2064       ERBB2
+# 2          2099        ESR1
+# 3          4288       MKI67
+
+###########################
