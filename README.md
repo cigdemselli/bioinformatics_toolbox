@@ -33,3 +33,10 @@ Outputs graphs showing the levels of a gene in normal and cancer tissue based on
 ```
 hpa_plot(gene = "ENSG00000091831", normal = "breast", cancer = "breast cancer")
 ```
+
+**`survivALL_dataframe`**
+
+Outputs a data frame with P values and Hazard Ratios (HR) for all possible gene expression thresholds of a gene using survivALL package (pearce_dom). 
+```
+see the file survivALL_dataframe file
+```
