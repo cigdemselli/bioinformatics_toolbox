@@ -1,0 +1,18 @@
+#this code if for getting P and HR values for all possible gene expression thresholds of a gene using survivALL package. 
+#esetin: an expression set object with gene expression matrix (exprs) and outcome data (pData)
+#gene: hgnc symbol of the gene of interest
+#time: column name defining survival time in the eset
+#event: column name defining event status in the eset
+
+#get data frame (survivALL_df) with results for all possible thresholds
+library (survivALL)
+esetin=eset
+gene="IL4R"
+gene_vec <- exprs(esetin)[gene, ] 
+survivALL_df <- survivALL(measure = gene_vec, 
+   srv = pData(esetin), 
+   time = "survival_time", 
+   event = "death_alive_status")
+   
+#to see how many thresholds are significant
+table(survivALL_df["p"] < 0.05 & survivALL_df["HR"] > 1) 
